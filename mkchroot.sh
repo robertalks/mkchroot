@@ -197,7 +197,7 @@ if [ -z "${location}" ]; then
 	location="/srv/chroot"
 fi
 
-if [ "$(uname -m)" == "x86_64" ]; then
+if [ "$(uname -m)" = "x86_64" ]; then
 	arch="x86_64"
 	libarch="lib64"
 else
