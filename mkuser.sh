@@ -74,7 +74,7 @@ fi
 
 no_chroot=0
 
-while getopts "hvn:u:g:r:c:" opt; do
+while getopts "hvnu:g:r:c:" opt; do
 	case "${opt}" in
 		h)
 		  _usage
