@@ -31,7 +31,7 @@ Usage: $name [OPTIONS] ...
                        (default: /srv/chroot)
 
 Example:
-     $name -u test1 -g sshusers -c /var/chroot
+     $name -u test1 -g sshusers -r "Test user" -c /var/chroot
    or
      $name -u test1 -n
 
@@ -44,6 +44,7 @@ create_user()
 	local group="$2"
 	local realname="$3"
 
+	_echo "Creating user ..."
 	useradd -M -d /home/${username} -g ${group} -c "${realname}" ${username} >/dev/null 2>&1; err=$?
 	if [ ${err} -ne 0 ]; then
 		_echo "useradd failed to create user." >&2
@@ -57,10 +58,11 @@ create_env()
 	local group="$2"
 	local chroot="$3"
 
-	mkdir -p ${chroot}/home/${username} 2>/dev/null
-	cp /etc/skel/.??* ${chroot}/home/${username} 2>/dev/null
-	mkdir -p ${chroot}/home/${username}/{webs,logs} 2>/dev/null
-	chown -R ${username}.${group} ${chroot}/home/${username} 2>/dev/null
+	_echo "Creating environment and copying skel ..."
+	mkdir -p ${chroot}/home/${username} >/dev/null 2>&1
+	cp /etc/skel/.??* ${chroot}/home/${username} >/dev/null 2>&1
+	mkdir -p ${chroot}/home/${username}/{webs,logs} >/dev/null 2>&1
+	chown -R ${username}.${group} ${chroot}/home/${username} >/dev/null 2>&1
 }
 
 if [ $# -eq 0 ]; then
@@ -120,7 +122,7 @@ if [ -z "${location}" ]; then
 fi
 
 chroot_location="${location}/${username}"
-[ -d ${chroot_location} ] || mkdir -p ${chroot_location} 2>/dev/null
+[ -d ${chroot_location} ] || mkdir -p ${chroot_location} >/dev/null 2>&1
 
 # create user, using useradd
 create_user "${username}" "${group}" "${realname}"

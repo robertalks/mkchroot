@@ -37,7 +37,7 @@ setup_rsyslog()
 	local dir="$2"
 
 	if [ -r /etc/rsyslog.conf ]; then
-		[ -d /etc/rsyslog.d ] || mkdir -p /etc/rsyslog.d
+		[ -d /etc/rsyslog.d ] || mkdir -p /etc/rsyslog.d >/dev/null 2>&1
 		cat << EOF > /etc/rsyslog.d/${user}.conf
 \$ModLoad imuxsock
 \$AddUnixListenSocket ${dir}/dev/log
@@ -63,9 +63,9 @@ resolv_ldd()
 	for lib in ${ldd}; do
 		dir="$(dirname ${lib})"
 		bin="$(basename ${lib})"
-		[ -d "${xdir}/${dir}" ] || mkdir -p "${xdir}/${dir}" 2>/dev/null
+		[ -d "${xdir}/${dir}" ] || mkdir -p "${xdir}/${dir}" >/dev/null 2>&1
 		if [ -e "${xdir}/${dir}" ]; then
-			cp "${lib}" "${xdir}/${dir}" 2>/dev/null
+			cp "${lib}" "${xdir}/${dir}" >/dev/null 2>&1
 		fi
 	done
 }
@@ -78,14 +78,14 @@ setup_chroot()
 	fi
 
 	for dir in ${dir_list}; do
-		mkdir -p ${chroot_location}/${dir} 2>/dev/null
+		[ -d ${chroot_location}/${dir} ] || mkdir -p ${chroot_location}/${dir} >/dev/null 2>&1
 	done
-	chmod 1777 ${chroot_location}/tmp 2>/dev/null
+	chmod 1777 ${chroot_location}/tmp >/dev/null 2>&1
 
 	etc_list="ld.so.cache hostname hosts issue motd nsswitch.conf os-release protocols resolv.conf localtime"
 	for etc in ${etc_list}; do
 		if ! $(cmd /etc/${etc} ${chroot_location}/etc/${etc} >/dev/null 2>&1); then
-			cp -a /etc/${etc} ${chroot_location}/etc 2>/dev/null
+			cp -a /etc/${etc} ${chroot_location}/etc >/dev/null 2>&1
 		fi
 	done
 
@@ -126,18 +126,18 @@ setup_chroot()
 		bin="$(basename ${lib})"
         	[ -d ${chroot_location}/${dir} ] || mkdir -p ${chroot_location}/${dir}
 		if [ ! -e "${chroot_location}/${dir}/${bin}" ]; then
-			cp ${lib} ${chroot_location}/${dir} 2>/dev/null
+			cp ${lib} ${chroot_location}/${dir} >/dev/null 2>&1
 		fi
 	done
 
 	if [ "$arch" == "x86_64" ]; then
-		cp /lib64/ld-linux-x86-64.so.2 ${chroot_location}/${libarch} 2>/dev/null
+		cp /lib64/ld-linux-x86-64.so.2 ${chroot_location}/${libarch} >/dev/null 2>&1
 	else
-		cp /lib/ld-linux.so.2 ${chroot_location}/lib 2>/dev/null
+		cp /lib/ld-linux.so.2 ${chroot_location}/lib >/dev/null 2>&1
 	fi
 
 	if [ -x "${chroot_location}/bin/busybox" ]; then
-		chroot ${chroot_location} /bin/busybox --install -s /bin 2>/dev/null
+		chroot ${chroot_location} /bin/busybox --install -s /bin >/dev/null 2>&1
 		if [ $? -ne 0 ]; then
 			_echo "failed to install/setup busybox" >&2
 		fi
@@ -193,7 +193,7 @@ else
 fi
 
 chroot_location="${location}/${username}"
-[ -d ${chroot_location} ] || mkdir -p ${chroot_location} 2>/dev/null
+[ -d ${chroot_location} ] || mkdir -p ${chroot_location} >/dev/null 2>&1
 
 # setup chroot environment
 setup_chroot
