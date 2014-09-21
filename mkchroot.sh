@@ -33,16 +33,19 @@ EOF
 
 setup_rsyslog()
 {
-	local user="$1"
+	local username="$1"
 	local dir="$2"
 
 	if [ -r /etc/rsyslog.conf ]; then
 		_echo "Setting up rsyslog logging ..."
 		[ -d /etc/rsyslog.d ] || mkdir -p /etc/rsyslog.d >/dev/null 2>&1
-		cat << EOF > /etc/rsyslog.d/${user}.conf
+		cat << EOF > /etc/rsyslog.d/${username}.conf
 \$ModLoad imuxsock
 \$AddUnixListenSocket ${dir}/dev/log
 :programname, isequal, "internal-sftp" -/var/log/${user}-sftp.log
+:programname, isequal, "internal-sftp" ~
+:msg, contains, " ${username} " -/var/log/${user}-ssh.log
+:msg, contains, " ${username} " ~
 EOF
 		if [ -x /etc/init.d/rsyslog ]; then
 			/etc/init.d/rsyslog restart >/dev/null 2>&1
