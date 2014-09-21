@@ -113,7 +113,7 @@ setup_chroot()
 		mknod -m 0666 ${chroot_location}/dev/tty c 5 0
 	fi
 
-	bin_list="/bin/busybox /bin/bash /usr/bin/scp"
+	bin_list="/bin/busybox /bin/bash /usr/bin/scp /bin/ping"
 	for bin in ${bin_list}; do
 		dir="$(dirname ${bin})"
 		xbin="$(basename ${bin})"
@@ -133,7 +133,8 @@ setup_chroot()
 	/lib/${arch}-linux-gnu/libdl.so.2 \
 	/lib/${arch}-linux-gnu/libnsl.so.1 \
 	/lib/${arch}-linux-gnu/libpthread.so.0 \
-	/lib/${arch}-linux-gnu/librt.so.1"
+	/lib/${arch}-linux-gnu/librt.so.1 \
+	/lib/${arch}-linux-gnu/libresolv.so.2"
 	for lib in ${lib_list}; do
 		dir="$(dirname ${lib})"
 		bin="$(basename ${lib})"
