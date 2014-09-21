@@ -1,0 +1,41 @@
+Port 22
+Protocol 2
+ListenAddress 0.0.0.0
+ServerKeyBits 1024
+SyslogFacility AUTHPRIV
+LogLevel INFO
+LoginGraceTime 600
+MaxStartups 10
+PermitRootLogin yes
+StrictModes yes
+PermitUserEnvironment no
+UsePrivilegeSeparation yes
+MaxAuthTries 3
+RSAAuthentication yes
+PubkeyAuthentication yes
+AuthorizedKeysFile .ssh/authorized_keys
+AllowTcpForwarding no
+GatewayPorts no
+RhostsRSAAuthentication no
+IgnoreRhosts yes
+PermitEmptyPasswords no
+PasswordAuthentication yes
+ChallengeResponseAuthentication no
+ClientAliveInterval 10
+ClientAliveCountMax 60
+UsePAM yes
+AcceptEnv LANG LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES
+AcceptEnv LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT
+AcceptEnv LC_IDENTIFICATION LC_ALL
+X11Forwarding no
+PrintMotd no
+UseLogin no
+
+# Subsystem sftp /usr/lib/openssh/sftp-server
+Subsystem sftp internal-sftp -l VERBOSE -t LOCAL6
+
+# Chroot
+Match Group users
+  ChrootDirectory /srv/chroot/%u
+  X11Forwarding no
+  AllowTCPForwarding no
