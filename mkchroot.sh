@@ -95,16 +95,19 @@ setup_chroot()
 	if [ ! -c "${chroot_location}/dev/null" ]; then
 		_echo "Creating device node: /dev/null"
 		mknod -m 0666 ${chroot_location}/dev/null c 1 3
-	elif [ ! -c "${chroot_location}/dev/random" ]; then
+	fi
+	if [ ! -c "${chroot_location}/dev/random" ]; then
 		_echo "Creating device node: /dev/random"
 		mknod -m 0666 ${chroot_location}/dev/random c 1 8
-	elif [ ! -c "${chroot_location}/dev/urandom" ]; then
+	if [ ! -c "${chroot_location}/dev/urandom" ]; then
 		_echo "Creating device node: /dev/urandom"
 		mknod -m 0666 ${chroot_location}/dev/urandom c 1 9
-	elif [ ! -c "${chroot_location}/dev/zero" ]; then
+	fi
+	if [ ! -c "${chroot_location}/dev/zero" ]; then
 		_echo "Creating device node: /dev/zero"
 		mknod -m 0666 ${chroot_location}/dev/zero c 1 5
-	elif [ ! -c "${chroot_location}/dev/tty" ]; then
+	fi
+	if [ ! -c "${chroot_location}/dev/tty" ]; then
 		_echo "Creating device node: /dev/tty"
 		mknod -m 0666 ${chroot_location}/dev/tty c 5 0
 	fi
