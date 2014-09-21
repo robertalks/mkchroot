@@ -113,7 +113,7 @@ setup_chroot()
 		mknod -m 0666 ${chroot_location}/dev/tty c 5 0
 	fi
 
-	bin_list="/bin/busybox /bin/bash"
+	bin_list="/bin/busybox /bin/bash /usr/bin/scp"
 	for bin in ${bin_list}; do
 		dir="$(dirname ${bin})"
 		xbin="$(basename ${bin})"
