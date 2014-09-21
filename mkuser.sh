@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/bash -e
 
 name="$(basename $0)"
 version="1.0"
