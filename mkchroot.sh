@@ -6,7 +6,7 @@ version="1.0"
 _echo()
 {
 	local msg="$1"
-	echo -e "${name}: ${msg}"
+	echo "${name}: ${msg}"
 }
 
 _usage()
