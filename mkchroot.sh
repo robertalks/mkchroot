@@ -43,7 +43,6 @@ setup_rsyslog()
 \$ModLoad imuxsock
 \$AddUnixListenSocket ${dir}/dev/log
 :programname, isequal, "internal-sftp" -/var/log/${user}-sftp.log
-:programname, isequal, "internal-sftp" ~
 EOF
 		if [ -x /etc/init.d/rsyslog ]; then
 			/etc/init.d/rsyslog restart >/dev/null 2>&1
