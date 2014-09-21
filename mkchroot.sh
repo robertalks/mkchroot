@@ -181,9 +181,7 @@ if [ -z "${username}" ]; then
 fi
 
 if [ -z "${location}" ]; then
-	chroot_location="/srv/chroot/${username}"
-else
-	chroot_location="${location}/${username}"
+	location="/srv/chroot"
 fi
 
 if [ "$(uname -m)" == "x86_64" ]; then
@@ -194,8 +192,12 @@ else
 	libarch=""
 fi
 
-# [ -d ${chroot_location} ] || mkdir -p ${chroot_location} 2>/dev/null
-# setup_chroot
-# setup_rsyslog "${username}" "${chroot_location}"
+chroot_location="${location}/${username}"
+[ -d ${chroot_location} ] || mkdir -p ${chroot_location} 2>/dev/null
+
+# setup chroot environment
+setup_chroot
+# setup rsyslog to log sftp
+setup_rsyslog "${username}" "${chroot_location}"
 
 exit $?

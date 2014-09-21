@@ -1,7 +1,7 @@
 #!/bin/sh -e
 
 name="$(basename $0)"
-version="1.0'
+version="1.0"
 cwd="$(dirname $0)"
 
 _echo()
@@ -23,8 +23,10 @@ Usage: $name [OPTIONS] ...
                        (default: on)
         -u             Specify username (this cant be empty)
                        (default: none)
-        -g             Specify user group
+        -g             Specify username group
                        (default: users)
+        -r             Specify username real name
+                       (default: SSH User)
         -c             Specify chroot directory
                        (default: /srv/chroot)
 
@@ -69,7 +71,7 @@ fi
 
 no_chroot=0
 
-while getopts "hvc:u:" opt; do
+while getopts "hvn:u:g:r:c:" opt; do
 	case "${opt}" in
 		h)
 		  _usage
@@ -88,6 +90,9 @@ while getopts "hvc:u:" opt; do
 		g)
 		  group="${OPTARG}"
 		;;
+		r)
+		  realname="${OPTARG}"
+		;;	
 		c)
 		  location="${OPTARG}"
 		;;
@@ -106,20 +111,29 @@ if [ -z "${group}" ]; then
 	group="users"
 fi
 
-if [ -z "${location}" ]; then
-	chroot_location="/srv/chroot/${username}"
-else
-	chroot_location="${location}/${username}"
+if [ -z "${realname}" ]; then
+	realname="SSH User"
 fi
 
-[ -d ${chroot_location} ] || mkdir -p ${chroot_location} 2>/dev/null
+if [ -z "${location}" ]; then
+	location="/srv/chroot"
+fi
+
+chroot_location="${location}/${username}"
+echo "[ -d ${chroot_location} ] || mkdir -p ${chroot_location} 2>/dev/null"
+
+# create user, using useradd
+echo "create_user "${username}" "${group}" "${realname}""
+# create environment
+echo "create_env "${username}" "${group}" "${chroot_location}""
 
 if [ ${no_chroot} -eq 1 ]; then
 	if [ -x "${cwd}/mkchroot.sh" ]; then
-		${cwd}/mkchroot.sh -u ${username} -c ${location}
+		echo "${cwd}/mkchroot.sh -u "${username}" -c "${location}""
 	else
-		_echo "mkchroot.sh not found." >&2
+		echo "mkchroot.sh not found or its not executable." >&2
 		exit 1
+	fi
 fi
 
 exit $?
