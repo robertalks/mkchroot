@@ -44,9 +44,9 @@ create_user()
 	local group="$2"
 	local realname="$3"
 
-	useradd -M -d /home/${username} -g ${group} -c "${realname}" ${username}; err=$?
+	useradd -M -d /home/${username} -g ${group} -c "${realname}" ${username} >/dev/null 2>&1; err=$?
 	if [ ${err} -ne 0 ]; then
-		_echo "failed to create user." >&2
+		_echo "useradd failed to create user." >&2
 		exit ${err}
 	fi
 }
@@ -120,18 +120,18 @@ if [ -z "${location}" ]; then
 fi
 
 chroot_location="${location}/${username}"
-echo "[ -d ${chroot_location} ] || mkdir -p ${chroot_location} 2>/dev/null"
+[ -d ${chroot_location} ] || mkdir -p ${chroot_location} 2>/dev/null
 
 # create user, using useradd
-echo "create_user "${username}" "${group}" "${realname}""
+create_user "${username}" "${group}" "${realname}"
 # create environment
-echo "create_env "${username}" "${group}" "${chroot_location}""
+create_env "${username}" "${group}" "${chroot_location}"
 
 if [ ${no_chroot} -eq 1 ]; then
 	if [ -x "${cwd}/mkchroot.sh" ]; then
-		echo "${cwd}/mkchroot.sh -u "${username}" -c "${location}""
+		${cwd}/mkchroot.sh -u "${username}" -c "${location}"
 	else
-		echo "mkchroot.sh not found or its not executable." >&2
+		_echo "mkchroot.sh not found or its not executable." >&2
 		exit 1
 	fi
 fi
