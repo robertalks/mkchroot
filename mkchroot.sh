@@ -99,6 +99,7 @@ setup_chroot()
 	if [ ! -c "${chroot_location}/dev/random" ]; then
 		_echo "Creating device node: /dev/random"
 		mknod -m 0666 ${chroot_location}/dev/random c 1 8
+	fi
 	if [ ! -c "${chroot_location}/dev/urandom" ]; then
 		_echo "Creating device node: /dev/urandom"
 		mknod -m 0666 ${chroot_location}/dev/urandom c 1 9
