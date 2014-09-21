@@ -45,7 +45,7 @@ create_user()
 	local realname="$3"
 
 	_echo "Creating user ..."
-	useradd -M -d /home/${username} -g ${group} -c "${realname}" ${username} >/dev/null 2>&1; err=$?
+	useradd -M -d /home/${username} -g ${group} -c "${realname}" -s /bin/bash ${username} >/dev/null 2>&1; err=$?
 	if [ ${err} -ne 0 ]; then
 		_echo "useradd failed to create user." >&2
 		exit ${err}
