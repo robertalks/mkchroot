@@ -130,7 +130,7 @@ create_user "${username}" "${group}" "${realname}"
 # create environment
 create_env "${username}" "${group}" "${chroot_location}"
 
-if [ ${no_chroot} -eq 1 ]; then
+if [ ${no_chroot} -eq 0 ]; then
 	if [ -x "${cwd}/mkchroot.sh" ]; then
 		${cwd}/mkchroot.sh -u "${username}" -c "${location}"
 	else
