@@ -61,7 +61,8 @@ create_env()
 	_echo "Creating environment and copying skel ..."
 	mkdir -p ${chroot}/home/${username} >/dev/null 2>&1
 	cp /etc/skel/.??* ${chroot}/home/${username} >/dev/null 2>&1
-	mkdir -p ${chroot}/home/${username}/{webs,logs} >/dev/null 2>&1
+	mkdir -p ${chroot}/home/${username}/webs >/dev/null 2>&1
+	mkdir -p ${chroot}/home/${username}/logs >/dev/null 2>&1
 	chown -R ${username}.${group} ${chroot}/home/${username} >/dev/null 2>&1
 }
 

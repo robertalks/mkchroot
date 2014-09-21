@@ -37,6 +37,7 @@ setup_rsyslog()
 	local dir="$2"
 
 	if [ -r /etc/rsyslog.conf ]; then
+		_echo "Setting up rsyslog logging ..."
 		[ -d /etc/rsyslog.d ] || mkdir -p /etc/rsyslog.d >/dev/null 2>&1
 		cat << EOF > /etc/rsyslog.d/${user}.conf
 \$ModLoad imuxsock
@@ -78,6 +79,7 @@ setup_chroot()
 	fi
 
 	for dir in ${dir_list}; do
+		_echo "Creating directory: ${chroot_location}/${dir}"
 		[ -d ${chroot_location}/${dir} ] || mkdir -p ${chroot_location}/${dir} >/dev/null 2>&1
 	done
 	chmod 1777 ${chroot_location}/tmp >/dev/null 2>&1
@@ -85,19 +87,25 @@ setup_chroot()
 	etc_list="ld.so.cache hostname hosts issue motd nsswitch.conf os-release protocols resolv.conf localtime"
 	for etc in ${etc_list}; do
 		if ! $(cmd /etc/${etc} ${chroot_location}/etc/${etc} >/dev/null 2>&1); then
+			_echo "Copying etc file: /etc/${etc}"
 			cp -a /etc/${etc} ${chroot_location}/etc >/dev/null 2>&1
 		fi
 	done
 
 	if [ ! -c "${chroot_location}/dev/null" ]; then
+		_echo "Creating device node: /dev/null"
 		mknod -m 0666 ${chroot_location}/dev/null c 1 3
 	elif [ ! -c "${chroot_location}/dev/random" ]; then
+		_echo "Creating device node: /dev/random"
 		mknod -m 0666 ${chroot_location}/dev/random c 1 8
 	elif [ ! -c "${chroot_location}/dev/urandom" ]; then
+		_echo "Creating device node: /dev/urandom"
 		mknod -m 0666 ${chroot_location}/dev/urandom c 1 9
 	elif [ ! -c "${chroot_location}/dev/zero" ]; then
+		_echo "Creating device node: /dev/zero"
 		mknod -m 0666 ${chroot_location}/dev/zero c 1 5
 	elif [ ! -c "${chroot_location}/dev/tty" ]; then
+		_echo "Creating device node: /dev/tty"
 		mknod -m 0666 ${chroot_location}/dev/tty c 5 0
 	fi
 
@@ -106,6 +114,7 @@ setup_chroot()
 		dir="$(dirname ${bin})"
 		xbin="$(basename ${bin})"
 		[ -d ${chroot_location}/${dir} ] || mkdir -p ${chroot_location}/${dir}
+		_echo "Copying binary file: ${bin} ..."
 		if [ ! -x "${chroot_location}/${dir}/${xbin}" ]; then
 			cp -a ${bin} ${chroot_location}/${dir}
 			resolv_ldd "${chroot_location}" "${bin}"
@@ -125,18 +134,22 @@ setup_chroot()
 		dir="$(dirname ${lib})"
 		bin="$(basename ${lib})"
         	[ -d ${chroot_location}/${dir} ] || mkdir -p ${chroot_location}/${dir}
+		_echo "Copying library file: ${lib}"
 		if [ ! -e "${chroot_location}/${dir}/${bin}" ]; then
 			cp ${lib} ${chroot_location}/${dir} >/dev/null 2>&1
 		fi
 	done
 
 	if [ "$arch" == "x86_64" ]; then
+		_echo "Copying /lib64/ld-linux-x86-64.so.2 for ${arch}"
 		cp /lib64/ld-linux-x86-64.so.2 ${chroot_location}/${libarch} >/dev/null 2>&1
 	else
+		_echo "Copying /lib/ld-linux.so.2 for ${arch}"
 		cp /lib/ld-linux.so.2 ${chroot_location}/lib >/dev/null 2>&1
 	fi
 
 	if [ -x "${chroot_location}/bin/busybox" ]; then
+		_echo "Installing /bin/busybox into ${chroot_location}"
 		chroot ${chroot_location} /bin/busybox --install -s /bin >/dev/null 2>&1
 		if [ $? -ne 0 ]; then
 			_echo "failed to install/setup busybox" >&2
