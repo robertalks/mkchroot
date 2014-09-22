@@ -19,7 +19,7 @@ Usage: $name [OPTIONS] ...
 
         -h             Show help
         -v             Show script version
-        -n             Dont run mkchroot.sh script
+        -n             Disable calling mkchroot.sh script
                        (default: on)
         -u             Specify username (this cant be empty)
                        (default: none)

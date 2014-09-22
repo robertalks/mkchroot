@@ -44,8 +44,6 @@ setup_rsyslog()
 \$AddUnixListenSocket ${dir}/dev/log
 :programname, isequal, "internal-sftp" -/var/log/${username}-sftp.log
 :programname, isequal, "internal-sftp" ~
-:msg, contains, " ${username} " -/var/log/${username}-ssh.log
-:msg, contains, " ${username} " ~
 EOF
 		if [ -x /etc/init.d/rsyslog ]; then
 			/etc/init.d/rsyslog restart >/dev/null 2>&1
