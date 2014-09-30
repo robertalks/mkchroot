@@ -65,7 +65,7 @@ resolv_ldd()
 		dir="$(dirname ${lib})"
 		bin="$(basename ${lib})"
 		[ -d "${xdir}/${dir}" ] || mkdir -p "${xdir}/${dir}" >/dev/null 2>&1
-		_echo "Copying libriaries ${lib} for binary ${binary} ..."
+		_echo "Copying shared library ${lib} for binary ${binary} ..."
 		cp -f "${lib}" "${xdir}/${dir}" >/dev/null 2>&1
 	done
 }
@@ -112,10 +112,13 @@ setup_chroot()
 		mknod -m 0666 ${chroot_location}/dev/tty c 5 0
 	fi
 
-	bin_list="/bin/busybox /bin/bash /usr/bin/scp /bin/ping"
+	bin_list="/bin/busybox /bin/bash /usr/bin/scp /bin/ping /usr/bin/sendmail /usr/sbin/sendmail /usr/bin/mail"
 	for bin in ${bin_list}; do
 		dir="$(dirname ${bin})"
 		xbin="$(basename ${bin})"
+		if [ ! -x "${bin}" ]; then
+			_echo "Ignoring ${bin}, not found."
+		fi
 		[ -d ${chroot_location}/${dir} ] || mkdir -p ${chroot_location}/${dir}
 		if [ -L "${bin}" ]; then
 			octal_rights="$(stat -c %a $(readlink -f ${bin}))"
