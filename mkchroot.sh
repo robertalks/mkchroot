@@ -141,7 +141,7 @@ setup_chroot()
 		( cd ${chroot_location}/usr/sbin
 		  ln -sf mini_sendmail sendmail
 		  cd ${chroot_location}/usr/lib
-		  ln -sf ../bin/sendmail .
+		  ln -sf ../sbin/sendmail .
 		)
 	fi
 
