@@ -65,9 +65,8 @@ resolv_ldd()
 		dir="$(dirname ${lib})"
 		bin="$(basename ${lib})"
 		[ -d "${xdir}/${dir}" ] || mkdir -p "${xdir}/${dir}" >/dev/null 2>&1
-		if [ -e "${xdir}/${dir}" ]; then
-			cp "${lib}" "${xdir}/${dir}" >/dev/null 2>&1
-		fi
+		_echo "Copying libriaries ${ldd} for binary ${binary} ..."
+		cp -f "${lib}" "${xdir}/${dir}" >/dev/null 2>&1
 	done
 }
 
@@ -118,11 +117,16 @@ setup_chroot()
 		dir="$(dirname ${bin})"
 		xbin="$(basename ${bin})"
 		[ -d ${chroot_location}/${dir} ] || mkdir -p ${chroot_location}/${dir}
-		_echo "Copying binary file: ${bin} ..."
-		if [ ! -x "${chroot_location}/${dir}/${xbin}" ]; then
-			cp -a ${bin} ${chroot_location}/${dir}
-			resolv_ldd "${chroot_location}" "${bin}"
+		if [ -L "${bin}" ]; then
+			octal_rights="$(stat -c %a $(readlink -f ${bin}))"
+		else
+			octal_rights="$(stat -c %a ${bin})"
 		fi
+		_echo "Copying binary file: ${bin} ..."
+		cp -f "${bin}" "${chroot_location}/${dir}" 2>/dev/null
+		_echo "Setting ${octal_rights} rights to ${nbin} ..."
+		chmod ${octal_rights} ${chroot_location}/${bin} 2>/dev/null
+		resolv_ldd "${chroot_location}" "${bin}"
 	done
 
 	lib_list="/lib/${arch}-linux-gnu/libnss_compat.so.2 \
@@ -140,17 +144,15 @@ setup_chroot()
 		bin="$(basename ${lib})"
         	[ -d ${chroot_location}/${dir} ] || mkdir -p ${chroot_location}/${dir}
 		_echo "Copying library file: ${lib}"
-		if [ ! -e "${chroot_location}/${dir}/${bin}" ]; then
-			cp ${lib} ${chroot_location}/${dir} >/dev/null 2>&1
-		fi
+		cp -f ${lib} ${chroot_location}/${dir} >/dev/null 2>&1
 	done
 
 	if [ "$arch" == "x86_64" ]; then
 		_echo "Copying /lib64/ld-linux-x86-64.so.2 for ${arch}"
-		cp /lib64/ld-linux-x86-64.so.2 ${chroot_location}/${libarch} >/dev/null 2>&1
+		cp -f /lib64/ld-linux-x86-64.so.2 ${chroot_location}/${libarch} >/dev/null 2>&1
 	else
 		_echo "Copying /lib/ld-linux.so.2 for ${arch}"
-		cp /lib/ld-linux.so.2 ${chroot_location}/lib >/dev/null 2>&1
+		cp -f /lib/ld-linux.so.2 ${chroot_location}/lib >/dev/null 2>&1
 	fi
 
 	if [ -x "${chroot_location}/bin/busybox" ]; then
