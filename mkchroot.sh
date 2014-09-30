@@ -112,7 +112,7 @@ setup_chroot()
 		mknod -m 0666 ${chroot_location}/dev/tty c 5 0
 	fi
 
-	bin_list="/bin/busybox /bin/bash /usr/bin/scp /bin/ping /usr/bin/sendmail /usr/sbin/sendmail /usr/bin/mail"
+	bin_list="/bin/busybox /bin/bash /usr/bin/scp /bin/ping /usr/bin/mail"
 	for bin in ${bin_list}; do
 		dir="$(dirname ${bin})"
 		xbin="$(basename ${bin})"
@@ -133,10 +133,19 @@ setup_chroot()
 		fi
 	done
 
-	lib_list="/lib/${arch}-linux-gnu/libnss_compat.so.2 \
-	/lib/${arch}-linux-gnu/libnss_dns.so.2 \
-	/lib/${arch}-linux-gnu/libnss_files.so.2 \
-	/lib/${arch}-linux-gnu/libnss_nis.so.2 \
+	if [ -x /usr/sbin/mini_sendmail ]; then
+		[ -d ${chroot_location}/usr/sbin ] || mkdir -p ${chroot_location}/usr/sbin
+		[ -d ${chroot_location}/usr/lib ] || mkdir -p ${chroot_location}/usr/lib
+		_echo "Copying binary file: /usr/sbin/mini_sendmail ..."
+		cp -a /usr/sbin/mini_sendmail ${chroot_location}/usr/sbin 2>/dev/null
+		( cd ${chroot_location}/usr/sbin
+		  ln -sf mini_sendmail sendmail
+		  cd ${chroot_location}/usr/lib
+		  ln -sf ../bin/sendmail .
+		)
+	fi
+
+	lib_list="/lib/${arch}-linux-gnu/libnss_*.so.2 \
 	/lib/${arch}-linux-gnu/libc.so.6 \
 	/lib/${arch}-linux-gnu/libdl.so.2 \
 	/lib/${arch}-linux-gnu/libnsl.so.1 \
