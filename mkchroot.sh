@@ -65,7 +65,7 @@ resolv_ldd()
 		dir="$(dirname ${lib})"
 		bin="$(basename ${lib})"
 		[ -d "${xdir}/${dir}" ] || mkdir -p "${xdir}/${dir}" >/dev/null 2>&1
-		_echo "Copying libriaries ${ldd} for binary ${binary} ..."
+		_echo "Copying libriaries ${lib} for binary ${binary} ..."
 		cp -f "${lib}" "${xdir}/${dir}" >/dev/null 2>&1
 	done
 }
@@ -124,8 +124,8 @@ setup_chroot()
 		fi
 		_echo "Copying binary file: ${bin} ..."
 		cp -f "${bin}" "${chroot_location}/${dir}" 2>/dev/null
-		_echo "Setting ${octal_rights} rights to ${nbin} ..."
-		chmod ${octal_rights} ${chroot_location}/${bin} 2>/dev/null
+		_echo "Setting ${octal_rights} rights to ${chroot_location}${bin} ..."
+		chmod ${octal_rights} "${chroot_location}${bin}" 2>/dev/null
 		resolv_ldd "${chroot_location}" "${bin}"
 	done
 
