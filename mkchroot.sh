@@ -116,20 +116,21 @@ setup_chroot()
 	for bin in ${bin_list}; do
 		dir="$(dirname ${bin})"
 		xbin="$(basename ${bin})"
-		if [ ! -x "${bin}" ]; then
+		if [ -x "${bin}" ]; then
+			[ -d ${chroot_location}/${dir} ] || mkdir -p ${chroot_location}/${dir}
+			if [ -L "${bin}" ]; then
+				octal_rights="$(stat -c %a $(readlink -f ${bin}))"
+			else
+				octal_rights="$(stat -c %a ${bin})"
+			fi
+			_echo "Copying binary file: ${bin} ..."
+			cp -f "${bin}" "${chroot_location}/${dir}" 2>/dev/null
+			_echo "Setting ${octal_rights} rights to ${chroot_location}${bin} ..."
+			chmod ${octal_rights} "${chroot_location}${bin}" 2>/dev/null
+			resolv_ldd "${chroot_location}" "${bin}"
+		else
 			_echo "Ignoring ${bin}, not found."
 		fi
-		[ -d ${chroot_location}/${dir} ] || mkdir -p ${chroot_location}/${dir}
-		if [ -L "${bin}" ]; then
-			octal_rights="$(stat -c %a $(readlink -f ${bin}))"
-		else
-			octal_rights="$(stat -c %a ${bin})"
-		fi
-		_echo "Copying binary file: ${bin} ..."
-		cp -f "${bin}" "${chroot_location}/${dir}" 2>/dev/null
-		_echo "Setting ${octal_rights} rights to ${chroot_location}${bin} ..."
-		chmod ${octal_rights} "${chroot_location}${bin}" 2>/dev/null
-		resolv_ldd "${chroot_location}" "${bin}"
 	done
 
 	lib_list="/lib/${arch}-linux-gnu/libnss_compat.so.2 \
