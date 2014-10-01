@@ -31,28 +31,6 @@ Example:
 EOF
 }
 
-setup_rsyslog()
-{
-	local username="$1"
-	local dir="$2"
-
-	if [ -r /etc/rsyslog.conf ]; then
-		_echo "Setting up rsyslog logging ..."
-		[ -d /etc/rsyslog.d ] || mkdir -p /etc/rsyslog.d >/dev/null 2>&1
-		cat << EOF > /etc/rsyslog.d/${username}.conf
-\$ModLoad imuxsock
-\$AddUnixListenSocket ${dir}/dev/log
-:programname, isequal, "internal-sftp" -/var/log/${username}-sftp.log
-:programname, isequal, "internal-sftp" ~
-EOF
-		if [ -x /etc/init.d/rsyslog ]; then
-			/etc/init.d/rsyslog restart >/dev/null 2>&1
-		fi
-	else
-		_echo "rsyslog doesnt seem to be installed, skip this part" >&2
-	fi
-}
-
 resolv_ldd()
 {
 	local xdir="$1"
@@ -230,7 +208,5 @@ chroot_location="${location}/${username}"
 
 # setup chroot environment
 setup_chroot
-# setup rsyslog to log sftp
-setup_rsyslog "${username}" "${chroot_location}"
 
 exit $?
