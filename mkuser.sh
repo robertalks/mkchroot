@@ -4,10 +4,16 @@ name="$(basename $0)"
 version="1.0"
 cwd="$(dirname $0)"
 
-_echo()
+_info()
 {
         local msg="$1"
         echo "${name}: ${msg}"
+}
+
+_err()
+{
+	local msg="$1"
+	echo "${name}: error: ${msg}" >&2
 }
 
 _usage()
@@ -44,10 +50,10 @@ create_user()
 	local group="$2"
 	local realname="$3"
 
-	_echo "Creating user ..."
+	_info "Creating user ${username} ..."
 	useradd -M -d /home/${username} -g ${group} -c "${realname}" -s /bin/bash ${username} >/dev/null 2>&1; err=$?
 	if [ ${err} -ne 0 ]; then
-		_echo "useradd failed to create user." >&2
+		_err "useradd failed to create user."
 		exit ${err}
 	fi
 }
@@ -58,7 +64,7 @@ create_env()
 	local group="$2"
 	local chroot="$3"
 
-	_echo "Creating environment and copying skel ..."
+	_info "Creating environment and copying skel ..."
 	mkdir -p ${chroot}/home/${username} >/dev/null 2>&1
 	cp /etc/skel/.??* ${chroot}/home/${username} >/dev/null 2>&1
 	mkdir -p ${chroot}/home/${username}/webs >/dev/null 2>&1
@@ -68,7 +74,7 @@ create_env()
 
 if [ $# -eq 0 ]; then
 	_usage
-	_echo "missing option(s) or argument(s)." >&2
+	_err "missing option(s) or argument(s)."
 	exit 1
 fi
 
@@ -105,8 +111,13 @@ while getopts "hvnu:g:r:c:" opt; do
 	esac
 done
 
+if [ "$(id -u)" -ne 0 ]; then
+	_err "requires root privileges"
+	exit 1
+fi
+
 if [ -z "${username}" ]; then
-	_echo "username cant be empty."
+	_err "missing username"
 	exit 1
 fi
 
@@ -132,9 +143,10 @@ create_env "${username}" "${group}" "${chroot_location}"
 
 if [ ${no_chroot} -eq 0 ]; then
 	if [ -x "${cwd}/mkchroot.sh" ]; then
+		_info "Running ${cwd}/mkchroot.sh -u "${username}" -c "${location}" ..."
 		${cwd}/mkchroot.sh -u "${username}" -c "${location}"
 	else
-		_echo "mkchroot.sh not found or its not executable." >&2
+		_err "mkchroot.sh not found or its not executable."
 		exit 1
 	fi
 fi
