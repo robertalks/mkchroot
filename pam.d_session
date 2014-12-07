@@ -1,0 +1,1 @@
+session 	optional	pam_script.so dir=/path/to/pam_scripts onerr=success
