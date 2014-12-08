@@ -15,7 +15,7 @@ bind_mount()
 	[ -d "$src" ] || exit 0
 	[ -d "$dest" ] || exit 0
 
-	if ! /bin/grep -wq $dest /proc/mounts >/dev/null 2>&1; then
+	if ! /usr/bin/awk '{print $2}' /proc/mounts | /bin/grep -wq "^$dest\$" >/dev/null 2>&1; then
 		if /bin/mount --bind $src $dest >/dev/null 2>&1; then
 			/usr/bin/logger -p local0.notice -t "$prog" "mounted $dest"
 		else

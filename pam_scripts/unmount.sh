@@ -10,7 +10,7 @@ prog="$name[$pid]"
 unmount_bind()
 {
 	local mnt="$1"
-	local who="$(/usr/bin/who -u 2>/dev/null | awk '{print $1}' | grep -w ^$user)"
+	local who="$(/usr/bin/who -u 2>/dev/null | awk '{print $1}' | grep -w ^$user\$)"
 
 	[ -d "$mnt" ] || exit 0
 
