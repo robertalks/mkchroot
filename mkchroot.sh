@@ -77,7 +77,7 @@ setup_chroot()
 	chroot_location="$location/$username"
 	[ -d $chroot_location ] || mkdir -p $chroot_location >/dev/null 2>&1
 
-	dir_list="bin dev/pts etc home lib usr proc run sys tmp var/php/session var/php/tmp var/php/upload"
+	dir_list="bin dev/pts etc home lib usr proc run sys tmp var/mail var/php/session var/php/tmp var/php/upload"
 	if [ "x${libarch}" != "x" ]; then
 		dir_list="${dir_list} ${libarch}"
 	fi

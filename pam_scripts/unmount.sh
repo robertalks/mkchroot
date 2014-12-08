@@ -9,14 +9,17 @@ prog="$name[$pid]"
 
 unmount_bind()
 {
-	local mnt="1"
+	local mnt="$1"
+	local who="$(/usr/bin/who -u 2>/dev/null | awk '{print $1}' | grep -w ^$user)"
 
 	[ -d "$mnt" ] || exit 0
 
-	if /bin/umount -f $mnt >/dev/null 2>&1; then
-		/usr/bin/logger -p local0.notice -t "$prog" "unmounted $mnt"
-	else
-		/usr/bin/logger -p local0.warning -t "$prog" "failed to unmount $mnt"
+	if [ "x$who" = "x" ]; then
+		if /bin/umount -f $mnt >/dev/null 2>&1; then
+			/usr/bin/logger -p local0.notice -t "$prog" "unmounted $mnt"
+		else
+			/usr/bin/logger -p local0.warning -t "$prog" "failed to unmount $mnt"
+		fi
 	fi
 }
 
@@ -44,5 +47,8 @@ unmount_bind "$chroot/sys"
 
 # unmount $chroot/run
 unmount_bind "$chroot/run"
+
+# unmount $chroot/var/mail
+unmount_bind "$chroot/var/mail"
 
 exit 0

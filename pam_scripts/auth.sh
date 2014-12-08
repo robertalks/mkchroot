@@ -9,11 +9,11 @@ host="$(hostname -s)"
 prog="$name[$pid]"
 logfile="/var/log/user.log"
 
-if [ -z "$user" ]; then
+if [ -z "$PAM_USER" ]; then
 	exit 0
 fi
 
-if [ "$user" = "root" ]; then
+if [ "$PAM_USER" = "root" ]; then
 	exit 0
 fi
 

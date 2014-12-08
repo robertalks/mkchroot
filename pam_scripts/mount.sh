@@ -13,12 +13,14 @@ bind_mount()
 	local dest="$2"
 
 	[ -d "$src" ] || exit 0
-	[ -d "$desst" ] || exit 0
+	[ -d "$dest" ] || exit 0
 
-	if /bin/mount --bind $src $dest >/dev/null 2>&1; then
-		/usr/bin/logger -p local0.notice -t "$prog" "mounted $dest"
-	else
-		/usr/bin/logger -p local0.warning -t "$prog" "failed to mount $dest"
+	if ! /bin/grep -wq $dest /proc/mounts >/dev/null 2>&1; then
+		if /bin/mount --bind $src $dest >/dev/null 2>&1; then
+			/usr/bin/logger -p local0.notice -t "$prog" "mounted $dest"
+		else
+			/usr/bin/logger -p local0.warning -t "$prog" "failed to mount $dest"
+		fi
 	fi
 }
 
@@ -46,5 +48,8 @@ bind_mount "/sys" "$chroot/sys"
 
 # bind mount /run
 bind_mount "/run" "$chroot/run"
+
+# bind mount /var/mail
+bind_mount "/var/mail" "$chroot/var/mail"
 
 exit 0
