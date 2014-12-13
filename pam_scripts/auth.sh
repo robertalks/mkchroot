@@ -18,6 +18,7 @@ if [ "$PAM_USER" = "root" ]; then
 fi
 
 msg="logged in user=$PAM_USER ruser=$PAM_RUSER rhost=$PAM_RHOST tty=$PAM_TTY type=$PAM_TYPE service=$PAM_SERVICE"
+
 if [ -e "$logfile" ]; then
 	perm="$(/usr/bin/stat -c %a $logfile 2>/dev/null)"
 	if [ "$perm" != "640" ]; then

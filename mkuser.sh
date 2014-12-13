@@ -53,7 +53,7 @@ create_user()
 	info "Creating user $username ..."
 	useradd -M -d /home/$username -g $group -c "$realname" -s /bin/bash $username >/dev/null 2>&1
 	if [ $? -ne 0 ]; then
-		_err "useradd failed to create user"
+		err "useradd failed to create user"
 		exit 1 
 	fi
 }
@@ -80,7 +80,7 @@ fi
 no_chroot=0
 
 while getopts "hvnu:g:r:c:" opt; do
-	case "${opt}" in
+	case "$opt" in
 		h)
 			usage
 			exit 0
@@ -147,7 +147,7 @@ create_user "$username" "$group" "$realname"
 # create environment
 create_env "$username" "$group"
 
-if [ ${no_chroot} -eq 0 ]; then
+if [ $no_chroot -eq 0 ]; then
 	if [ -x "$cwd/mkchroot.sh" ]; then
 		info "Running $cwd/mkchroot.sh -u "$username" -c "$location" ..."
 		$cwd/mkchroot.sh -u "$username" -c "$location"

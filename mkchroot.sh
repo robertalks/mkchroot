@@ -78,11 +78,11 @@ setup_chroot()
 	[ -d $chroot_location ] || mkdir -p $chroot_location >/dev/null 2>&1
 
 	dir_list="bin dev/pts etc home lib usr proc run sys tmp var/mail var/php/session var/php/tmp var/php/upload"
-	if [ "x${libarch}" != "x" ]; then
-		dir_list="${dir_list} ${libarch}"
+	if [ "x$libarch" != "x" ]; then
+		dir_list="$dir_list $libarch"
 	fi
 
-	for dir in ${dir_list}; do
+	for dir in $dir_list; do
 		info "Creating directory: $chroot_location/$dir"
 		[ -d $chroot_location/$dir ] || mkdir -p $chroot_location/$dir >/dev/null 2>&1
 	done
@@ -92,10 +92,10 @@ setup_chroot()
 	chmod 1777 $chroot_location/var/php/upload >/dev/null 2>&1
 
 	etc_list="ld.so.cache hostname hosts issue motd nsswitch.conf os-release protocols resolv.conf localtime"
-	for etc in ${etc_list}; do
-		if ! $(cmd /etc/${etc} $chroot_location/etc/${etc} >/dev/null 2>&1); then
-			info "Copying etc file: /etc/${etc}"
-			cp -a /etc/${etc} $chroot_location/etc >/dev/null 2>&1
+	for etc in $etc_list; do
+		if ! $(cmd /etc/$etc $chroot_location/etc/$etc >/dev/null 2>&1); then
+			info "Copying etc file: /etc/$etc"
+			cp -a /etc/$etc $chroot_location/etc >/dev/null 2>&1
 		fi
 	done
 
@@ -121,23 +121,23 @@ setup_chroot()
 	fi
 
 	bin_list="/bin/busybox /bin/bash /usr/bin/scp /bin/ping /usr/bin/mail"
-	for bin in ${bin_list}; do
-		dir="$(dirname ${bin})"
-		xbin="$(basename ${bin})"
-		if [ -x "${bin}" ]; then
+	for bin in $bin_list; do
+		dir="$(dirname $bin)"
+		xbin="$(basename $bin)"
+		if [ -x "$bin" ]; then
 			[ -d $chroot_location/$dir ] || mkdir -p $chroot_location/$dir
-			if [ -L "${bin}" ]; then
-				octal_rights="$(stat -c %a $(readlink -f ${bin}))"
+			if [ -L "$bin" ]; then
+				perm="$(stat -c %a $(readlink -f $bin))"
 			else
-				octal_rights="$(stat -c %a ${bin})"
+				perm="$(stat -c %a $bin)"
 			fi
-			info "Copying binary file: ${bin} ..."
-			cp -f "${bin}" "$chroot_location/$dir" 2>/dev/null
-			info "Setting ${octal_rights} rights to $chroot_location${bin} ..."
-			chmod ${octal_rights} "$chroot_location${bin}" 2>/dev/null
-			resolv_ldd "$chroot_location" "${bin}"
+			info "Copying binary file: $bin ..."
+			cp -f "$bin" "$chroot_location/$dir" 2>/dev/null
+			info "Setting $perm rights to $chroot_location$bin ..."
+			chmod $perm "$chroot_location$bin" 2>/dev/null
+			resolv_ldd "$chroot_location" "$bin"
 		else
-			info "Ignoring ${bin}, not found"
+			info "Ignoring $bin, not found"
 		fi
 	done
 
@@ -153,14 +153,14 @@ setup_chroot()
 		)
 	fi
 
-	lib_list="/lib/${arch}-linux-gnu/libnss_*.so.2 \
-	/lib/${arch}-linux-gnu/libc.so.6 \
-	/lib/${arch}-linux-gnu/libdl.so.2 \
-	/lib/${arch}-linux-gnu/libnsl.so.1 \
-	/lib/${arch}-linux-gnu/libpthread.so.0 \
-	/lib/${arch}-linux-gnu/librt.so.1 \
-	/lib/${arch}-linux-gnu/libresolv.so.2"
-	for lib in ${lib_list}; do
+	lib_list="/lib/$arch-linux-gnu/libnss_*.so.2 \
+	/lib/$arch-linux-gnu/libc.so.6 \
+	/lib/$arch-linux-gnu/libdl.so.2 \
+	/lib/$arch-linux-gnu/libnsl.so.1 \
+	/lib/$arch-linux-gnu/libpthread.so.0 \
+	/lib/$arch-linux-gnu/librt.so.1 \
+	/lib/$arch-linux-gnu/libresolv.so.2"
+	for lib in $lib_list; do
 		dir="$(dirname $lib)"
 		bin="$(basename $lib)"
 		[ -d $chroot_location/$dir ] || mkdir -p $chroot_location/$dir
@@ -169,10 +169,10 @@ setup_chroot()
 	done
 
 	if [ "$arch" == "x86_64" ]; then
-		info "Copying /lib64/ld-linux-x86-64.so.2 for ${arch}"
-		cp -f /lib64/ld-linux-x86-64.so.2 $chroot_location/${libarch} >/dev/null 2>&1
+		info "Copying /lib64/ld-linux-x86-64.so.2 for $arch"
+		cp -f /lib64/ld-linux-x86-64.so.2 $chroot_location/$libarch >/dev/null 2>&1
 	else
-		info "Copying /lib/ld-linux.so.2 for ${arch}"
+		info "Copying /lib/ld-linux.so.2 for $arch"
 		cp -f /lib/ld-linux.so.2 $chroot_location/lib >/dev/null 2>&1
 	fi
 
