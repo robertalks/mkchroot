@@ -168,7 +168,7 @@ setup_chroot()
 		cp -f $lib $chroot_location/$dir >/dev/null 2>&1
 	done
 
-	if [ "$arch" == "x86_64" ]; then
+	if [ "$arch" = "x86_64" ]; then
 		info "Copying /lib64/ld-linux-x86-64.so.2 for $arch"
 		cp -f /lib64/ld-linux-x86-64.so.2 $chroot_location/$libarch >/dev/null 2>&1
 	else
@@ -230,7 +230,10 @@ if [ -z "$location" ]; then
 	location="/srv/chroot"
 fi
 
+# check and set architecture variables
 set_arch
+
+# setup the chroot environment
 setup_chroot
 
 exit 0

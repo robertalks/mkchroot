@@ -135,7 +135,7 @@ fi
 chroot_location="$location/$username"
 if [ ! -d "$chroot_location" ]; then
 	mkdir -p $chroot_location >/dev/null 2>&1
-	if [ $? -en 0 ]; then
+	if [ $? -ne 0 ]; then
 		err "failed to create $chroot_location"
 		exit 1
 	fi
@@ -147,14 +147,16 @@ create_user "$username" "$group" "$realname"
 # create environment
 create_env "$username" "$group"
 
-if [ $no_chroot -eq 0 ]; then
-	if [ -x "$cwd/mkchroot.sh" ]; then
+# check and run mkchroot.sh if not disable at command line
+if [ -x "$cwd/mkchroot.sh" ]; then
+	if [ $no_chroot -eq 0 ]; then
 		info "Running $cwd/mkchroot.sh -u "$username" -c "$location" ..."
 		$cwd/mkchroot.sh -u "$username" -c "$location"
 	else
-		err "mkchroot.sh not found or its not executable"
-		exit 1
+		info "Skip running mkchroot.sh, disable at command line"
 	fi
+else
+	err "mkchroot.sh not found or its not executable"
 fi
 
 exit 0

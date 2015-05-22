@@ -32,7 +32,7 @@ PrintMotd no
 UseLogin no
 
 # Subsystem sftp /usr/lib/openssh/sftp-server
-Subsystem sftp internal-sftp -l VERBOSE -t LOCAL6
+Subsystem sftp internal-sftp -l INFO -t LOCAL6
 
 # Chroot
 Match Group users
