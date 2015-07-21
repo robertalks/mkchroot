@@ -75,7 +75,7 @@ resolv_ldd()
 setup_chroot()
 {
 	chroot_location="$location/$username"
-	[ -d $chroot_location ] || mkdir -p $chroot_location >/dev/null 2>&1
+	[ -d "$chroot_location" ] || mkdir -p "$chroot_location" >/dev/null 2>&1
 
 	dir_list="bin dev/pts etc home lib usr proc run sys tmp var/mail var/php/session var/php/tmp var/php/upload"
 	if [ "x$libarch" != "x" ]; then
@@ -84,48 +84,49 @@ setup_chroot()
 
 	for dir in $dir_list; do
 		info "Creating directory: $chroot_location/$dir"
-		[ -d $chroot_location/$dir ] || mkdir -p $chroot_location/$dir >/dev/null 2>&1
+		[ -d "$chroot_location/$dir" ] || mkdir -p "$chroot_location/$dir" >/dev/null 2>&1
 	done
-	chmod 1777 $chroot_location/tmp >/dev/null 2>&1
-	chmod 1777 $chroot_location/var/php/tmp >/dev/null 2>&1
-	chmod 1777 $chroot_location/var/php/session >/dev/null 2>&1
-	chmod 1777 $chroot_location/var/php/upload >/dev/null 2>&1
+	chmod 1777 "$chroot_location/tmp" >/dev/null 2>&1
+	chmod 1777 "$chroot_location/var/php/tmp" >/dev/null 2>&1
+	chmod 1777 "$chroot_location/var/php/session" >/dev/null 2>&1
+	chmod 1777 "$chroot_location/var/php/upload" >/dev/null 2>&1
 
-	etc_list="ld.so.cache hostname hosts issue motd nsswitch.conf os-release protocols resolv.conf localtime"
+	etc_list="ld.so.cache hostname hosts issue motd nsswitch.conf os-release protocols resolv.conf"
 	for etc in $etc_list; do
-		if ! $(cmd /etc/$etc $chroot_location/etc/$etc >/dev/null 2>&1); then
+		if ! $(cmp -s "/etc/$etc" "$chroot_location/etc/$etc" >/dev/null 2>&1); then
 			info "Copying etc file: /etc/$etc"
-			cp -a /etc/$etc $chroot_location/etc >/dev/null 2>&1
+			cp -af "/etc/$etc" "$chroot_location/etc" >/dev/null 2>&1
 		fi
 	done
 
 	if [ ! -c "$chroot_location/dev/null" ]; then
 		info "Creating device node: /dev/null"
-		mknod -m 0666 $chroot_location/dev/null c 1 3
+		mknod -m 0666 "$chroot_location/dev/null" c 1 3
 	fi
 	if [ ! -c "$chroot_location/dev/random" ]; then
 		info "Creating device node: /dev/random"
-		mknod -m 0666 $chroot_location/dev/random c 1 8
+		mknod -m 0666 "$chroot_location/dev/random" c 1 8
 	fi
 	if [ ! -c "$chroot_location/dev/urandom" ]; then
 		info "Creating device node: /dev/urandom"
-		mknod -m 0666 $chroot_location/dev/urandom c 1 9
+		mknod -m 0666 "$chroot_location/dev/urandom" c 1 9
 	fi
 	if [ ! -c "$chroot_location/dev/zero" ]; then
 		info "Creating device node: /dev/zero"
-		mknod -m 0666 $chroot_location/dev/zero c 1 5
+		mknod -m 0666 "$chroot_location/dev/zero" c 1 5
 	fi
 	if [ ! -c "$chroot_location/dev/tty" ]; then
 		info "Creating device node: /dev/tty"
-		mknod -m 0666 $chroot_location/dev/tty c 5 0
+		mknod -m 0666 "$chroot_location/dev/tty" c 5 0
 	fi
 
+	# apt-get install -y busybox
 	bin_list="/bin/busybox /bin/bash /usr/bin/scp /bin/ping /usr/bin/mail"
 	for bin in $bin_list; do
 		dir="$(dirname $bin)"
 		xbin="$(basename $bin)"
 		if [ -x "$bin" ]; then
-			[ -d $chroot_location/$dir ] || mkdir -p $chroot_location/$dir
+			[ -d "$chroot_location/$dir" ] || mkdir -p "$chroot_location/$dir" >/dev/null 2>&1
 			if [ -L "$bin" ]; then
 				perm="$(stat -c %a $(readlink -f $bin))"
 			else
@@ -141,14 +142,15 @@ setup_chroot()
 		fi
 	done
 
-	if [ -x /usr/sbin/mini_sendmail ]; then
-		[ -d $chroot_location/usr/sbin ] || mkdir -p $chroot_location/usr/sbin
-		[ -d $chroot_location/usr/lib ] || mkdir -p $chroot_location/usr/lib
+	# https://github.com/robertalks/mini_sendmail.git
+	if [ -x "/usr/sbin/mini_sendmail" ]; then
+		[ -d "$chroot_location/usr/sbin" ] || mkdir -p "$chroot_location/usr/sbin"
+		[ -d "$chroot_location/usr/lib" ] || mkdir -p "$chroot_location/usr/lib"
 		info "Copying binary file: /usr/sbin/mini_sendmail ..."
-		cp -a /usr/sbin/mini_sendmail $chroot_location/usr/sbin 2>/dev/null
-		( cd $chroot_location/usr/sbin
+		cp -a "/usr/sbin/mini_sendmail" "$chroot_location/usr/sbin" 2>/dev/null
+		( cd "$chroot_location/usr/sbin"
 		  ln -sf mini_sendmail sendmail
-		  cd $chroot_location/usr/lib
+		  cd "$chroot_location/usr/lib"
 		  ln -sf ../sbin/sendmail .
 		)
 	fi
@@ -163,29 +165,45 @@ setup_chroot()
 	for lib in $lib_list; do
 		dir="$(dirname $lib)"
 		bin="$(basename $lib)"
-		[ -d $chroot_location/$dir ] || mkdir -p $chroot_location/$dir
+		[ -d "$chroot_location/$dir" ] || mkdir -p "$chroot_location/$dir" >/dev/null 2>&1
 		info "Copying library file: $lib"
-		cp -f $lib $chroot_location/$dir >/dev/null 2>&1
+		cp -f "$lib" "$chroot_location/$dir" >/dev/null 2>&1
 	done
 
 	if [ "$arch" = "x86_64" ]; then
 		info "Copying /lib64/ld-linux-x86-64.so.2 for $arch"
-		cp -f /lib64/ld-linux-x86-64.so.2 $chroot_location/$libarch >/dev/null 2>&1
+		cp -f "/lib64/ld-linux-x86-64.so.2" "$chroot_location/$libarch" >/dev/null 2>&1
 	else
 		info "Copying /lib/ld-linux.so.2 for $arch"
-		cp -f /lib/ld-linux.so.2 $chroot_location/lib >/dev/null 2>&1
+		cp -f "/lib/ld-linux.so.2" "$chroot_location/lib" >/dev/null 2>&1
 	fi
 
 	if [ -x "$chroot_location/bin/busybox" ]; then
 		info "Installing /bin/busybox into $chroot_location"
-		chroot $chroot_location /bin/busybox --install -s /bin >/dev/null 2>&1
+		chroot "$chroot_location" "/bin/busybox --install -s /bin" >/dev/null 2>&1
 		if [ $? -ne 0 ]; then
 			err "failed to install/setup busybox"
 		fi
 	fi
 
-	sed -rn "/(^root\:|^nobody\:|^$username\:)/p" /etc/passwd > $chroot_location/etc/passwd
-	awk -F':' '$3 <= 200 || $3 == 65534 {print}' /etc/group > $chroot_location/etc/group
+	if [ ! -e "$chroot_location/etc/localtime" ]; then
+		if [ -L "/etc/localtime" ]; then
+			cp -af "$(readlink -f /etc/localtime)" "$chroot_location/etc/localtime" >/dev/null 2>&1
+		else
+			cp -af "/etc/localtime" "$chroot_location/etc/localtime" >/dev/null 2>&1
+		fi
+	fi
+
+	sed -rn "/(^root\:|^nobody\:|^$username\:)/p" /etc/passwd > "$chroot_location/etc/passwd"
+	awk -F':' '$3 <= 200 || $3 == 65534 {print}' /etc/group > "$chroot_location/etc/group"
+
+	# this is a custom setup, might not be useful for everybody
+	# make it easy to access the chroot user home
+	[ -d "/srv/users" ] || mkdir -p "/srv/users" >/dev/null 2>&1
+	ln -sf "$chroot_location/home/$username" "/srv/users/$username" >/dev/null 2>&1
+	if [ $? -ne 0 ]; then
+		err "failed to create symlink to /srv/users/$username"
+	fi
 }
 
 if [ $# -eq 0 ]; then
