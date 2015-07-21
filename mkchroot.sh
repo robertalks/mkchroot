@@ -180,7 +180,7 @@ setup_chroot()
 
 	if [ -x "$chroot_location/bin/busybox" ]; then
 		info "Installing /bin/busybox into $chroot_location"
-		chroot "$chroot_location" "/bin/busybox --install -s /bin" >/dev/null 2>&1
+		chroot "$chroot_location" /bin/busybox --install -s /bin >/dev/null 2>&1
 		if [ $? -ne 0 ]; then
 			err "failed to install/setup busybox"
 		fi
